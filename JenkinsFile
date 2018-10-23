@@ -34,7 +34,7 @@ pipeline{
                 }
                 stage('Deploy to production'){
                     steps{
-                        bat 'pscp -i c:\\AWSCloudGuru\\CloudGuruTraining.ppk webapp\\target\\*.war ec2-user@$${params.tomcat_prod}:/var/lib/tomcat/'
+                        bat 'pscp -i c:\\AWSCloudGuru\\CloudGuruTraining.ppk webapp\\target\\*.war ec2-user@${params.tomcat_prod}:/var/lib/tomcat/'
                     }                           
                 }
 
