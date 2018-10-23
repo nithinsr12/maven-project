@@ -1,5 +1,15 @@
 pipeline{
     agent any
+
+    parameters{
+        string(name:'tomcat_staging',defaultValue:'54.237.196.185',description:'staging server')
+        string(name:'tomcat_prod',defaultValue:'34.207.246.51',description:'production server')
+    }
+
+    triggers{
+        pollSCM('* * * * *')
+    }
+
     stages{
         stage('Build'){
             steps{
@@ -7,17 +17,23 @@ pipeline{
             }
             post{
                 success{
-                    echo 'Now archiving...'
-                    archiveArtifacts artifacts:'**/target/*.war'               
-                }   
-
-            }
-        }
-        stage('Deploy to Staging'){
-            steps{
-                build job:'deploy-to-staging'
+                    echo 'Now Archiving'
+                    archiveArtifacts artifacts:'**/target/*.war'
+                }
             }
         }
 
+        stage('Deployments'){
+            parallel{
+                stage('Deploy to Staging'){
+                    bat 'pscp -i c:\AWSCloudGuru\CloudGuruTraining.ppk **/target/*.war ec2-user@${params.tomcat_staging}:/var/lib/tomcat/'
+                   
+                }
+                stage('Deploy to production'){
+                     bat 'pscp -i c:\AWSCloudGuru\CloudGuruTraining.ppk **/target/*.war ec2-user@$${params.tomcat_prod}:/var/lib/tomcat/'            
+                }
+
+            }
+        }
     }
 }
